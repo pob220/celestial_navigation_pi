@@ -8,6 +8,12 @@ introducing avoidable provenance and interpolation risk. The kernel and both
 optional runtime packs are versioned in this repository with Git LFS, so a
 Git-LFS-enabled clone contains everything needed for completely offline use.
 
+The same three binaries are mirrored as unsplit, direct-download assets in the
+[offline eclipse data 2026.1 GitHub release](https://github.com/pob220/celestial_navigation_pi/releases/tag/eclipse-data-2026.1).
+That release also contains `SHA256SUMS`, the three manifests and a concise
+offline-use guide. Each whole file is below GitHub's release-asset limit, so
+manual chunking and reconstruction are deliberately avoided.
+
 At runtime the engine never connects to a network. A user or package builder
 imports `data/de440s.bsp` into the plugin's private eclipse-data directory.
 The plugin checks its byte count, SHA-256 digest, DAF/SPK structure and segment

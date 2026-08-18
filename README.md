@@ -51,7 +51,10 @@ the three **Import** buttons once to copy these checksum-verified files from
 the checkout into OpenCPN's private plugin-data directory. No eclipse
 calculation or UI action performs network access. See
 [eclipse/DATA.md](eclipse/DATA.md) for exact files, provenance, checksums and
-storage sizes.
+storage sizes. Whole-file HTTPS downloads, including `SHA256SUMS` and the
+three source manifests, are also available from the
+[offline eclipse data 2026.1 release](https://github.com/pob220/celestial_navigation_pi/releases/tag/eclipse-data-2026.1);
+Git LFS is not required when using those release assets.
 
 The ordinary navigation planner is independent of the eclipse data packs. It
 uses the plugin's bundled VSOP87D, ELP2000 and navigational-star data, works
@@ -84,7 +87,9 @@ Compiling
 =========
 
 Install Git LFS before cloning so the offline eclipse data is checked out as
-real binary files rather than small LFS pointer files.
+real binary files rather than small LFS pointer files. Alternatively, download
+the whole files and `SHA256SUMS` from the
+[offline eclipse data release](https://github.com/pob220/celestial_navigation_pi/releases/tag/eclipse-data-2026.1).
 
 * `git lfs install`
 * `git clone --recurse-submodules https://github.com/pob220/celestial_navigation_pi.git`
