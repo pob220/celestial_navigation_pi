@@ -308,6 +308,8 @@ include_directories(BEFORE ${PROJECT_SOURCE_DIR}/src/geomag)
 target_sources(${PACKAGE_NAME} PUBLIC ${SRC} )
 if(QT_ANDROID)
   target_link_options(${PACKAGE_NAME} PRIVATE "-Wl,--exclude-libs,ALL")
+  target_link_options(${PACKAGE_NAME} PRIVATE
+    "-Wl,-z,max-page-size=16384" "-Wl,-z,common-page-size=16384")
 endif()
 
 # The eclipse numerical core is also usable as a standalone library/CLI. The
