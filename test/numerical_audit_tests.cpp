@@ -298,3 +298,33 @@ TEST(NumericalAudit, PlannerUtcAndShipZoneEntrySurviveComputerDaylightSavingGaps
   EXPECT_FALSE(ParseNauticalPlannerInstant("2026-03-29", "24:00:00",
       PlannerTimeBasis::Utc, 0, &ship));
 }
+
+TEST(NumericalAudit, RecordedUtcPreservesHistoricalAndFutureEpochs) {
+  // Independently tabulated Unix milliseconds, including the failing Debian
+  // 12 lunar reference epoch, leap-century rules and fractional seconds.
+  struct Row { const char* recorded; long long epoch; };
+  for (const auto& row : {
+      Row{"1965-01-02T03:04:05", -157668954875LL},
+      Row{"2000-02-29T16:24:06", 951841446125LL},
+      Row{"2038-01-19T03:14:08", 2147483648125LL},
+      Row{"2062-03-14T16:24:06", 2909579046125LL},
+      Row{"2062-07-14T16:24:06", 2920119846125LL},
+      Row{"2100-03-01T00:00:00", 4107542400125LL},
+      Row{"2200-12-31T23:59:59", 7289654399125LL}}) {
+    SCOPED_TRACE(row.recorded);
+    wxDateTime recorded;
+    ASSERT_TRUE(recorded.ParseISOCombined(row.recorded));
+    recorded.SetMillisecond(125);
+    const auto instant = UtcDateTime::ToInstant(recorded);
+    ASSERT_TRUE(instant.IsValid());
+    EXPECT_EQ(instant.GetValue().GetValue(), row.epoch);
+    EXPECT_EQ(instant.Format("%Y-%m-%dT%H:%M:%S", wxDateTime::UTC),
+              row.recorded);
+    const auto restored = UtcDateTime::FromInstant(instant);
+    EXPECT_EQ(restored.FormatISOCombined(), row.recorded);
+    EXPECT_EQ(restored.GetMillisecond(), 125);
+    EXPECT_EQ(UtcDateTime::ToInstant(restored), instant);
+    EXPECT_EQ(UtcDateTime::ToInstant(UtcDateTime::AddSeconds(recorded, 1.25))
+                  .GetValue().GetValue(), row.epoch + 1250);
+  }
+}

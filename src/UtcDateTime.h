@@ -6,6 +6,7 @@
 #include <cmath>
 #include <ctime>
 #include <array>
+#include <cstdint>
 
 #include <wx/datetime.h>
 #include <wx/string.h>
@@ -58,9 +59,22 @@ inline wxDateTime ToInstant(const wxDateTime& utcFields) {
 #ifdef __OCPN__ANDROID__
   return utcFields;
 #else
-  wxDateTime instant = CopyFields(utcFields);
-  instant.MakeFromUTC();
-  return instant;
+  // Interpret the recorded calendar fields directly as UTC. wxWidgets 3.2's
+  // MakeFromUTC can apply a spurious DST hour beyond 2038, even with TZ=UTC.
+  // Gregorian days since 1970-01-01 avoid local timezone/DST rules entirely.
+  const auto f = utcFields.GetTm();
+  const int month = int(f.mon) + 1;
+  const int year = f.year - (month <= 2);
+  const std::int64_t era = (year >= 0 ? year : year - 399) / 400;
+  const unsigned yearOfEra = static_cast<unsigned>(year - era * 400);
+  const unsigned dayOfYear =
+      (153 * (month + (month > 2 ? -3 : 9)) + 2) / 5 + f.mday - 1;
+  const unsigned dayOfEra = yearOfEra * 365 + yearOfEra / 4 -
+                           yearOfEra / 100 + dayOfYear;
+  const std::int64_t days = era * 146097 + dayOfEra - 719468;
+  const std::int64_t milliseconds =
+      ((days * 24 + f.hour) * 60 + f.min) * 60000 + f.sec * 1000 + f.msec;
+  return wxDateTime(wxLongLong(milliseconds));
 #endif
 }
 inline wxDateTime FromInstant(const wxDateTime& instant) {
@@ -68,7 +82,8 @@ inline wxDateTime FromInstant(const wxDateTime& instant) {
 #ifdef __OCPN__ANDROID__
   return instant;
 #else
-  return CopyFields(instant.ToUTC());
+  const auto f = instant.GetTm(wxDateTime::UTC);
+  return wxDateTime(f.mday, f.mon, f.year, f.hour, f.min, f.sec, f.msec);
 #endif
 }
 inline bool ParseUtc(const wxString& text, wxDateTime* value) {
