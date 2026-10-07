@@ -151,6 +151,7 @@ target_compile_definitions(celestial_tests
         LUNAR_REFERENCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/lunar-fixtures/references"
         USE_MOCK_DEFS
         CMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}"
+        CELESTIAL_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
         TESTDATA="${CMAKE_CURRENT_LIST_DIR}/testdata"
         UNIT_TESTS
         ECLIPSE_DE440_TEST_PATH="${CMAKE_SOURCE_DIR}/eclipse/data/de440s.bsp"
