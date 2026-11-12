@@ -848,12 +848,13 @@ TEST(LunarUiSmoke, TimeEntryAndResultModesPreserveRecordedInputs) {
       auto* showEcliptic = FindPlannerControl<wxCheckBox>(bodiesPage,
           [](wxCheckBox* c) { return c->GetLabel() == "Show ecliptic"; });
       auto* showMoonPath = FindPlannerControl<wxCheckBox>(bodiesPage,
-          [](wxCheckBox* c) { return c->GetLabel() == "Show Moon path"; });
+          [](wxCheckBox* c) { return c->GetName() == "PlannerShowMoonPath"; });
       ASSERT_NE(planningMode, nullptr);
       EXPECT_EQ(3, planningMode->GetCount());
       EXPECT_EQ(wxNOT_FOUND, planningMode->FindString("Show All"));
       ASSERT_NE(showEcliptic, nullptr);
       ASSERT_NE(showMoonPath, nullptr);
+      EXPECT_TRUE(showMoonPath->GetLabel().Contains("SHA/Dec"));
       EXPECT_FALSE(showMoonPath->IsEnabled());
       auto* lunarPairs = FindListWithColumn(bodiesPage, "Moon + body");
       ASSERT_NE(lunarPairs, nullptr);
@@ -926,6 +927,10 @@ TEST(LunarUiSmoke, TimeEntryAndResultModesPreserveRecordedInputs) {
               notebook->GetPageText(0) == "Local sky") plotNotebook = notebook;
       ASSERT_NE(plotNotebook, nullptr);
       plotNotebook->SetSelection(1);
+      wxBookCtrlEvent skyChanged(wxEVT_NOTEBOOK_PAGE_CHANGED,
+                                plotNotebook->GetId(), 1, 0);
+      skyChanged.SetEventObject(plotNotebook);
+      plotNotebook->ProcessWindowEvent(skyChanged);
       EXPECT_TRUE(showMoonPath->IsEnabled());
       for (int i = 0; i < 6; ++i) { wxTheApp->Yield(); wxMilliSleep(20); }
       for (int mask = 0; mask < 4; ++mask) {
